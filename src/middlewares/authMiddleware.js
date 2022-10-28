@@ -13,7 +13,8 @@ exports.createToken = (id) => {
 
 //Authorize users
 exports.auth = async (req, res, next) => {
-    let token;
+    try {
+      let token;
     if (
         req.headers.authorization &&
         req.headers.authorization.startsWith("Bearer")
@@ -32,6 +33,12 @@ exports.auth = async (req, res, next) => {
     
       req.user = user;
       next();
+    } catch (error) {
+        return res.status(400).json({
+            message: "authentication failed"
+        });
+  
+    }
 };
 
 //Check if user is logged in
@@ -43,5 +50,5 @@ exports.checkUser = (...roles) => {
         });
     }
     next();
-    };
+  }
 };

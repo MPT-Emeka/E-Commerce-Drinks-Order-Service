@@ -30,6 +30,8 @@ const addToCart = async (req, res) => {
         .json({ success: false, message: "unauthorized user" });
     }
 
+     
+
     const productExist = await Product.findOne({
       _id: req.body.productId,
     }); //check if product to be added to the cart exists in the store
@@ -40,6 +42,8 @@ const addToCart = async (req, res) => {
         message: "product to be added to cart not found in store",
       }); //if product doesn't exist return the json response above
     }
+
+   
 
     const cart = await Cart.findOne({ _id: user._id }); // find the user's cart
 
@@ -52,13 +56,29 @@ const addToCart = async (req, res) => {
       });
       // ADD TO CART SECTION
       // CHECK IF PRODUCT ALREADY IN CART
+
+      // let product = cart.products.find(req.body.productId)
+
+      // product.set('productCounter', undefined, {strict: false} );
+
       if (product) {
         console.log("product already exists in cart");
+
+        
 
         let quantity = parseInt(req.body.quantity);
         // convert product quantity to a number
 
+        
+
         product.quantity += quantity || 1;
+
+        if (product.quantity > productExist.amountInStock) {
+            return res.status(400).json({
+                success: false,
+                message: "item in cart has exceeded stock"
+            })
+        };
         // it's add specified quantity of product or adds 1 if quantity not specified
         product.subtotal = product.quantity * productExist.price;
 
@@ -111,13 +131,21 @@ const addToCart = async (req, res) => {
     else {
       console.log("user has no cart, create one");
 
+    //   User.updateOne(
+    //     { _id: userId },
+    //     { $set: { password: hash } },
+    //     { new: true }
+    //   );
+
+   // productExist.set('productCounter', undefined, {strict: false} );
+
       const cart = new Cart({
         _id: user._id,
 
         products: [
           {
             productID: req.body.productId,
-            product: req.body.productId,
+            product: req.body.productId, //req.body.productExist.select('-productCounter'),
             quantity: req.body.quantity || 1,
             price: productExist.price,
             subtotal: productExist.price * (req.body.quantity || 1),
@@ -126,6 +154,9 @@ const addToCart = async (req, res) => {
         itemCount: req.body.quantity || 1,
         totalPrice: productExist.price * (req.body.quantity || 1),
       });
+
+      
+
       cart.save((err, cart) => {
         if (err) {
           return res.status(500).json({
@@ -174,8 +205,8 @@ const removeFromCart = async (req, res) => {
     if (cart) {
       console.log("user has a cart");
 
-      // check if product already exists in cart
-      let product = cart.products.find((item) => {
+      // check if product already exists in cart              
+      let product = cart.products.find((item) => {                 // or let product = cart.find({ products: req.body.productId })
         if (item.productID === req.body.productId) {
           return item;
         }
@@ -205,28 +236,28 @@ const removeFromCart = async (req, res) => {
           cart.totalPrice = getSubtotal(cart.products);
         }
         cart.save(cart, (err, cart) => {
-          if (err) {
-            return res.status(400).json({
-              success: false,
-              message: err,
+            if (err) {
+                return res.status(400).json({
+                success: false,
+                message: err,
+                });
+            } else {
+                return res.status(200).json({
+                success: true,
+                message: "product deleted from cart successfully",
+                cart: cart,
+                });
+            }
             });
-          } else {
-            return res.status(200).json({
-              success: true,
-              message: "product deleted from cart successfully",
-              cart: cart,
-            });
-          }
-        });
       } else {
-        res.status(409).json({
-          success: false,
-          message: "cannot delete, this product is not in your cart ",
-        });
-      }
+            res.status(409).json({
+            success: false,
+            message: "cannot delete, this product is not in your cart ",
+            });
+        }
     }
 
-    // if user has no cart, create one
+    // if user has no cart
     else {
       return res
         .status(409)

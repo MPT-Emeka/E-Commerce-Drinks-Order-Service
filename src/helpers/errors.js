@@ -1,7 +1,7 @@
 //handle errors
 const handleError = (err) => {
     console.log(err.message);
-    let errors = { fullname : "", email : "", password : "", confirmPassword : ""};
+    let errors = { name : "", email : "", password : "", confirmPassword : ""};
 
     //duplicate error code
     if(err.code === 11000) {

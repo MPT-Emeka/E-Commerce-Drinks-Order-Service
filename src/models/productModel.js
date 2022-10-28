@@ -28,7 +28,7 @@ const productSchema = mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "Product"
   },
-  productCounter: {
+  amountInStock: {
     type: Number,
     default: 1,
   },
@@ -48,7 +48,7 @@ const productSchema = mongoose.Schema({
   },
   occasion: {
     type: String,
-    required: [true, "Enter an occassion e.g anniversary"],
+    required: [true, "Enter an occasion e.g anniversary"],
     minlength: [6, "Minimum length of occasion is 6 characters"],
     maxlength: 20,
   }

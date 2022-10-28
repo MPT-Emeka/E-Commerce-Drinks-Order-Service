@@ -7,6 +7,7 @@ const path = require("path");
 dotenv.config({ path: "./config.env" });
 const UserRouter = require("./src/routes/userRoute");
 const productRouter = require("./src/routes/productRoute");
+const recommendRouter = require("./src/routes/recommendRoute");
 const cartRouter = require("./src/routes/cartRoute");
 const orderRouter = require("./src/routes/orderRoute");
 const authRoutes = require("./src/routes/auth-route");
@@ -28,9 +29,11 @@ app.use(morgan("dev", { stream: accessLogStream }));
 
 app.use("/api/v1/auths", authRoutes);
 app.use("/api/v1/users", UserRouter);
+app.use("/api/v1/recommendations", recommendRouter);
 app.use("/api/v1/products", productRouter);
 app.use("/api/v1/carts", cartRouter);
 app.use("/api/v1/orders", orderRouter);
+
 
 const db = async () => {
   await mongoose.connect(process.env.DB_URL);

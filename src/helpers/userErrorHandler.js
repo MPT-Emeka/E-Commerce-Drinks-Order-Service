@@ -5,7 +5,7 @@ const express = require("express");
 exports.handleErrors = (err) => {
   console.log(err.message, err.code);
   let errors = {
-    fullname: "",
+    name: "",
     email: "",
     password: "",
   };

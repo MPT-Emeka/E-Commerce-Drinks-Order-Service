@@ -78,7 +78,11 @@ const createOrder =  async (req, res) => {
  const deleteOrder = async (req, res) => {
     try {
       
-      const { userId} = req.params;
+        
+        //const order = await Order.findOne({id});
+
+     // const { userId} = req.params;
+      const userId = req.params.userId;
       const orderId = req.body.orderId;
       const user = await User.findById(userId);
       if(!user)
@@ -113,7 +117,7 @@ const createOrder =  async (req, res) => {
 // GET ONE USER ORDER
 const getUserOrder = async (req, res) => {
     try {
-      const {userId } = req.params;
+      const { userId } = req.params;
       const user = await User.findById(userId);
       if(!user)
         {

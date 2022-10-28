@@ -1,6 +1,6 @@
 const express = require("express");
 const cartController = require("../controllers/cartController");
-const { auth, checkUser } = require("../middleware/authMiddleware");
+const { auth, checkUser } = require("../middlewares/authMiddleware");
 const app = express();
 
 app.use(express.json());

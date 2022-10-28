@@ -1,6 +1,6 @@
 const express = require("express");
 const UserController = require("../controllers/userController");
-const { auth, checkUser } = require("../middleware/authMiddleware");
+const { auth, checkUser } = require("../middlewares/authMiddleware");
 const app = express();
 
 app.use(express.json());

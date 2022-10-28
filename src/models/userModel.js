@@ -19,20 +19,20 @@ const userSchema = mongoose.Schema({
         required : [true, "Password field is required"],
         minlength : [6, "Password is less than 6 characters"],
         select: false,
-        match: [
-            /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/,
-            "Minimum password length is 6 characters and should contain Upper and lowercase and Special characters ",
-          ]
+        // match: [
+        //     /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/,
+        //     "Minimum password length is 6 characters and should contain Upper and lowercase and Special characters ",
+        //   ]
     },
     confirmPassword : {
         type : String,
         required : [true, "Make sure input is the same as password"],
         minlength : [6, "Password is less than 6 characters"],
         select: false,
-        match: [
-            /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/,
-            "Minimum password length is 6 characters and should contain Upper and lowercase and Special characters ",
-          ]
+        // match: [
+        //     /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/,
+        //     "Minimum password length is 6 characters and should contain Upper and lowercase and Special characters ",
+        //   ]
     },
     phoneNumber : {
         type : String,

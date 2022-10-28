@@ -1,7 +1,7 @@
 const User = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const Token = require("../models/token-model");
-const { createToken } = require("../middleware/authMiddleware");
+const { createToken } = require("../middlewares/authMiddleware");
 const handleError = require("../helpers/errors");
 const crypto = require("crypto");
 const cookie = require("cookie-parser");
@@ -99,7 +99,7 @@ exports.logout = async (req, res) => {
   try {
     const token = "";
     res.cookie("jwt", token, { httpOnly: true}); // decrease max age
-    res.status(200).json({ message: "You've successfully logged out" }).redirect("/"); //add homepage url. 
+    res.status(200).json({ message: "You've successfully logged out" }) //.redirect("/"); //add homepage url. 
   } catch (error) {
     res.status(404).json({ message: "Account not logged out" });
   }
@@ -129,6 +129,7 @@ const requestPasswordReset = async (email) => {
 const resetPassword = async (userId, token, password) => {
   try {
     const passwordResetToken = await Token.findOne({ userId });
+    console.log(passwordResetToken)
     if (!passwordResetToken) {
       return res
         .status(400)
@@ -137,15 +138,15 @@ const resetPassword = async (userId, token, password) => {
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
+    console.log(hash)
     await User.updateOne(
       { _id: userId },
       { $set: { password: hash } },
       { new: true }
     );
-
     return res
       .status(200)
-      .json({ message: "You have successfully updated your Password." });
+      .send({ message: "You have successfully updated your Password." });
   } catch (error) {
     res.status(400).json({ message: error });
   }

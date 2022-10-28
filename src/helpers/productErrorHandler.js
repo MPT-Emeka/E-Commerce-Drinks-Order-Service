@@ -14,10 +14,11 @@ const productErrorHandler = (err) => {
   let error = {
     productName: "",
     category: "",
-    uniqueProductId: "",
+    subCategory: "",
+    gulp: "",
     price: "",
     description: "",
-    images: "",
+    expiryDate: "",
     timestamps: "",
   };
 
