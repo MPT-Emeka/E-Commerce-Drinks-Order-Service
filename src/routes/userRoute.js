@@ -10,6 +10,6 @@ const { updateUser, getUser, getAllUsers, deleteUser } = UserController;
 
 router.route("/user").get(auth, getAllUsers).delete(auth, deleteUser);
 
-router.route("/user/:id").get(auth, getUser).put(updateUser);
+router.route("/user/:id").get(auth, getUser).put(auth, updateUser);
 
 module.exports = router;

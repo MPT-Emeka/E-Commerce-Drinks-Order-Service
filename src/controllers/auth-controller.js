@@ -98,7 +98,7 @@ exports.signIn = async (req, res) => {
 exports.logout = async (req, res) => {
   try {
     const token = "";
-    res.cookie("jwt", token, { httpOnly: true}); // decrease max age
+    res.cookie("jwt", token, { httpOnly: true, maxAge: 30 },); // decrease max age
     res.status(200).json({ message: "You've successfully logged out" }) //.redirect("/"); //add homepage url. 
   } catch (error) {
     res.status(404).json({ message: "Account not logged out" });
@@ -128,6 +128,7 @@ const requestPasswordReset = async (email) => {
 
 const resetPassword = async (userId, token, password) => {
   try {
+    
     const passwordResetToken = await Token.findOne({ userId });
     console.log(passwordResetToken)
     if (!passwordResetToken) {
@@ -143,7 +144,7 @@ const resetPassword = async (userId, token, password) => {
       { _id: userId },
       { $set: { password: hash } },
       { new: true }
-    );
+  );
     return res
       .status(200)
       .send({ message: "You have successfully updated your Password." });

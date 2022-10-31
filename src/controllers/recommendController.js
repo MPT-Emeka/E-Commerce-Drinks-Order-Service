@@ -4,9 +4,9 @@ const Product = require("../models/productModel");
 exports.recommendDrinks = async (req, res) => {
     try {
         //const recommend = req.body.occasion;
-        const findReco = await Product.occasion.find(req.body.occasion)
+        const findReco = await Product.find({ occasion: req.body.occasion })
         if (findReco) {
-          return res.status(200).send({
+          return res.status(200).json({
               status: true,
               message: "Drinks recommended",
               drinksRecommended: findReco
@@ -18,6 +18,7 @@ exports.recommendDrinks = async (req, res) => {
             })
         } 
     } catch (err) {
+        console.log(err)
         return res.status(401).send({
         status: false,
         message: "Invalid input",

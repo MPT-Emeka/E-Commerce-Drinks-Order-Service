@@ -21,7 +21,7 @@ const productSchema = mongoose.Schema({
   },
   gulp: {
     type: mongoose.Schema.ObjectId,
-    ref: "User",
+    ref: "user",
     required: [true, "Please create a gulp admin account"],
   },
   productId: {
@@ -45,6 +45,10 @@ const productSchema = mongoose.Schema({
   expiryDate: {
     type: String,
     required: [true, "Enter an expiry date"]
+  },
+  images: {
+    type: String,
+    required: [true, "Enter image URL"],
   },
   occasion: {
     type: String,

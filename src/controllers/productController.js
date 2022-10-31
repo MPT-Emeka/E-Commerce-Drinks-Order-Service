@@ -8,6 +8,12 @@ const { response } = require("../../app");
 exports.createProduct = async (request, response) => {  
   try {
     const user = await User.findById(request.body.gulp);
+    if (user.role.includes("user")) {
+        return response.status(400).send({
+            status: false,
+            message: "only gulp admins can upload drinks"
+        })
+    }
     const productCt = await Product.findOne({ productName: request.body.productName }); 
     if (user && productCt) {  
       productCt.amountInStock += 1;
@@ -25,6 +31,11 @@ exports.createProduct = async (request, response) => {
                 message: "product has been uploaded successfully",
                 productToReturn: product,
         })
+    } else {
+        return response.status(400).send({
+            status: false,
+            message: "only gulp admins can upload drinks"
+        })
     }
   } catch (error) {
     const err = productErrorHandler(error);
@@ -34,6 +45,14 @@ exports.createProduct = async (request, response) => {
 
 exports.updateProduct = async (request, response) => {
   try {
+    const user = await User.findById(request.headers.id);
+    if (user.role.includes("user")) {
+        return response.status(400).send({
+            status: false,
+            message: "only gulp admins can update drinks"
+        })
+    }
+
     const findProduct = await Product.findById(request.params.id);
     console.log(findProduct)
     if (findProduct) {
@@ -59,17 +78,6 @@ exports.updateProduct = async (request, response) => {
 
 exports.getProduct = async (request, response) => {
     try {
-
-        // const reco = request.body.occassion;
-        // const findReco = await Product.find({ occassion: reco }); or await product.occassion.find(req.body.ocassion)
-        // if (findReco) {
-        //   return response.status(200).send({
-        //       status: true,
-        //       message: "Drinks recommended",
-        //       drinksRecommended: findReco
-        //   })
-        // }
-
       const id = request.params.id;
       const findOneProduct = await Product.findById(id);
       if (!findOneProduct) {
@@ -99,14 +107,6 @@ exports.getProduct = async (request, response) => {
 
 exports.getProductListing = async (request, response) => {
     try {
-    //   const productCt = await Product.find({
-    //     productName: request.body.productName,
-    //   });
-
-    //   if(productCt) {
-    //    productCt.productCounter += 1;
-    //   }
-
 
       const findAllProduct = await Product.find();
       return response.status(200).send({
@@ -125,29 +125,38 @@ exports.getProductListing = async (request, response) => {
 
 exports.deleteProduct = async (request, response) => {
   try {
+    const user = await User.findById(request.headers.id);
+    if (user.role.includes("user")) {
+        return response.status(400).send({
+            status: false,
+            message: "only gulp admins can delete drinks"
+        })
+    }
     const { id } = request.query;
     const findProduct = await Product.findById(id)
-    if (findProduct.amountInStock > 1) {
+    if(findProduct) {
+        if (findProduct.amountInStock >= 1) {
       findProduct.amountInStock -= 1;
       await findProduct.save();
       return response.status(200).send({
         status: true,
-        message: `Single Product ${findProduct.productName} deleted successfully`,
+        message: `A bottle of ${findProduct.productName} deleted successfully`,
         deletedProduct: findProduct,
       });
-    }else if (findProduct.amountInStock === 1){
-      findProduct.deleteOne();
+    }else if (findProduct.amountInStock === 0){
+      findProduct.delete();
       return response.status(200).send({
         status: true,
         message: "Product deleted successfully",
         deletedProduct: findProduct,
       })
-    } else if (!findProduct) {
+    };
+    } else {
       return response.status(404).send({
         status: false,
         message: "Product not found",
       });
-    }
+    };
   } catch (error) {
     const err = productErrorHandler(error);
     return response.status(400).json({ err });

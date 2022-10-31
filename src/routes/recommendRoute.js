@@ -7,6 +7,6 @@ app.use(express.json());
 const router = express.Router();
 
 const { recommendDrinks } = recommendController;
-router.route("/recommendedDrinks").post(auth, recommendDrinks);
+router.route("/recommendedDrinks").post(recommendDrinks);
 
 module.exports = router;
