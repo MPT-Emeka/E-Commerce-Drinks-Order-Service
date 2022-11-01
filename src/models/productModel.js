@@ -10,13 +10,13 @@ const productSchema = mongoose.Schema({
   category: {
     type: String,
     required: [true, "Please enter a category"],
-    minlength: [4, "Minimum length of category is 4 characters"],
+    minlength: [2, "Minimum length of category is 4 characters"],
     maxlength: 30,
   },
   subCategory: {
     type: String,
     required: [true, "Please enter a sub category"],
-    minlength: [4, "Minimum length of sub category is 4 characters"],
+    minlength: [2, "Minimum length of sub category is 4 characters"],
     maxlength: 30,
   },
   gulp: {
@@ -36,6 +36,10 @@ const productSchema = mongoose.Schema({
     type: Number,
     required: [true, "Enter a price"],
   },
+  brand: {
+    type: String,
+    required: [true, "Enter a brand"],
+  },
   description: {
     type: String,
     required: [true, "Enter a product description"],
@@ -53,7 +57,7 @@ const productSchema = mongoose.Schema({
   occasion: {
     type: String,
     required: [true, "Enter an occasion e.g anniversary"],
-    minlength: [6, "Minimum length of occasion is 6 characters"],
+    minlength: [2, "Minimum length of occasion is 6 characters"],
     maxlength: 20,
   }
 }, { timestamps: true }

@@ -122,13 +122,12 @@ const requestPasswordReset = async (email) => {
 
     return tokenReset;
   } catch (error) {
-    res.status(400).json({ message: error });
+    res.status(400).json({ message: error }); //return
   }
 };
 
 const resetPassword = async (userId, token, password) => {
   try {
-    
     const passwordResetToken = await Token.findOne({ userId });
     console.log(passwordResetToken)
     if (!passwordResetToken) {
@@ -136,7 +135,6 @@ const resetPassword = async (userId, token, password) => {
         .status(400)
         .json({ message: "Invalid token" });
     }
-
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
     console.log(hash)
@@ -144,11 +142,13 @@ const resetPassword = async (userId, token, password) => {
       { _id: userId },
       { $set: { password: hash } },
       { new: true }
-  );
-    return res
-      .status(200)
-      .send({ message: "You have successfully updated your Password." });
+  ); 
+  return ({ "message": "You have successfully updated your Password." });
+    // return res
+    //   .status(201)
+    //   .send({ "message": "You have successfully updated your Password." }); //added vb
   } catch (error) {
+    console.log(error)
     res.status(400).json({ message: error });
   }
 };
@@ -171,7 +171,7 @@ exports.resetPasswordController = async (req, res, next) => {
       req.body.token,
       req.body.password
     );
-    return res.status(200).json(resetPasswordService);
+    return res.status(200).json(resetPasswordService); 
   } catch (error) {
     res.status(400).json({ message: error });
   }

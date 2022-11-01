@@ -80,6 +80,7 @@ exports.getProduct = async (request, response) => {
     try {
       const id = request.params.id;
       const findOneProduct = await Product.findById(id);
+      
       if (!findOneProduct) {
         return response.status(404).send({
           status: false,
@@ -92,7 +93,6 @@ exports.getProduct = async (request, response) => {
           productToReturn: findOneProduct,
         });
       }
-   
     } catch (err) {
         return response.status(401).send({
         status: false,
@@ -100,10 +100,6 @@ exports.getProduct = async (request, response) => {
         });
     }
   } 
-  
-  
-
-
 
 exports.getProductListing = async (request, response) => {
     try {

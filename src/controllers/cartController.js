@@ -63,31 +63,18 @@ const addToCart = async (req, res) => {
         let quantity = parseInt(req.body.quantity);
         // it's add specified quantity of product or adds 1 if quantity not specified
         product.quantity += quantity || 1;
-
-
         if (productExist.amountInStock < product.quantity) {
             return res.status(401).send({
                 status: false,
                 message: "Item is temporarily out of stock"
             })
         }
-
-        // // this ensures the product quantity in cart doesn't exceed the product stock and also indicates when the product is out of stock
-        // if (productExist.amountInStock <= 0 && product.quantity > productExist.amountInStock ) {    //  if (product.quantity > productExist.amountInStock) 
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: "item is out of stock"
-        //     })
-        // } 
-        // else {
-        //     productExist.amountInStock -= 1;
-        // };
-        // await productExist.save();
-
-
         // this calculates the subtotal cost of product
         product.subtotal = product.quantity * productExist.price;
+       
         cart.itemCount = checkQuantity(cart.products);
+       // let productToReturn = await Product.findById(id).select("+amountInStock");
+
         cart.totalPrice = parseInt(getSubtotal(cart.products));
         cart.save(cart, (err, cart) => {
           if (err) {
@@ -96,11 +83,20 @@ const addToCart = async (req, res) => {
               message: err.message,
             });
           } else {
-            return res.status(200).json({
-              success: true,
-              message: "Cart updated",
-              cart: cart,
-            });
+            if (cart.itemCount >= 10) {
+                return res.status(200).json({
+                    success: true,
+                    complimentary: "Disposable Cups included",
+                    message: "Cart updated",
+                    cart: cart,
+                  });
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    message: "Cart updated",
+                    cart: cart,
+                  });
+            }  
           }
         });
       } else {
@@ -113,16 +109,7 @@ const addToCart = async (req, res) => {
           subtotal: productExist.price * (req.body.quantity || 1),
         });
         cart.itemCount = checkQuantity(cart.products);
-        cart.quantity = getSubtotal(cart.products);
-        // if (cart.products.quantity > productExist.amountInStock) {    //  if (product.quantity > productExist.amountInStock) 
-        //     return res.status(400).json({
-        //         success: false,
-        //         message: "item is out of stock"
-        //     })
-        // } else {
-        //     console.log(productExist.amountInStock)
-       // productExist.amountInStock -= 1;
-       // await productExist.save();
+        cart.totalPrice = getSubtotal(cart.products);
         cart.save((err, cart) => {
           if (err) {
             return res.status(400).json({
@@ -130,34 +117,34 @@ const addToCart = async (req, res) => {
               message: err.message,
             });
           } else {
-            return res.status(200).json({
-              success: true,
-              message: "Cart updated",
-              cart: cart,
-            });
+            if (cart.itemCount >= 10) {
+                return res.status(200).json({
+                    success: true,
+                    message: "Cart updated",
+                    complimentary: "Disposable Cups included",
+                    cart: cart,
+                  });
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    message: "Cart updated",
+                    cart: cart,
+                  });
+            }
           }
         });
       }
     }
-
     // if user has no cart, create one
     else {
       console.log("user has no cart, create one");
-
-    //   User.updateOne(
-    //     { _id: userId },
-    //     { $set: { password: hash } },
-    //     { new: true }
-    //   );
-
    // productExist.set('productCounter', undefined, {strict: false} );
-
       const cart = new Cart({
         _id: user._id,
         products: [
           {
             productID: req.body.productId,
-            product: req.body.productId, //req.body.productExist.select('-productCounter'), or product: productExist
+            product: req.body.productId, 
             quantity: req.body.quantity || 1,
             price: productExist.price,
             subtotal: productExist.price * (req.body.quantity || 1),
@@ -166,8 +153,6 @@ const addToCart = async (req, res) => {
         itemCount: req.body.quantity || 1,
         totalPrice: productExist.price * (req.body.quantity || 1),
       });
-    //   productExist.amountInStock -= 1;
-    //   await productExist.save();
 
       cart.save((err, cart) => {
         if (err) {
@@ -221,10 +206,7 @@ const removeFromCart = async (req, res) => {
       // CHECK IF PRODUCT ALREADY IN CART
       if (product != undefined) {
 
-        // const checker = productExist
-        // console.log(checker)
-        // checker.amountInStock += 1
-        // await checker.save()
+    
 
         let quantity = parseInt(req.body.quantity); // convert product quantity to a number or we can remove this line.
         if (cart.products.length === 1 && product.quantity === 1) {
@@ -254,6 +236,14 @@ const removeFromCart = async (req, res) => {
                 message: err,
                 });
             } else {
+                if (cart.itemCount >= 10) {
+                    return res.status(200).json({
+                        success: true,
+                        message: "product deleted from cart successfully",
+                        complimentary: "Disposable Cups included",
+                        cart: cart,
+                        }); 
+                }
                 return res.status(200).json({
                 success: true,
                 message: "product deleted from cart successfully",
@@ -281,6 +271,8 @@ const removeFromCart = async (req, res) => {
   }
 };
 
+
+
 const getCart = async (req, res) => {
   try {
     const userID = req.params.id;
@@ -295,11 +287,20 @@ const getCart = async (req, res) => {
       _id: user.id,
     });
     if (cart) {
-      return res.json({
-        success: true,
-        message: "Cart retrieved",
-        cart: cart,
-      });
+        if (cart.itemCount >= 10) {
+            return res.json({
+                success: true,
+                message: "Cart retrieved",
+                complimentary: "Disposable Cups included",
+                cart: cart,
+              });
+        } else {
+            return res.json({
+                success: true,
+                message: "Cart retrieved",
+                cart: cart,
+              });
+        };
     } else {
       return res.json({
         success: false,

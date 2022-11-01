@@ -17,6 +17,7 @@ const productErrorHandler = (err) => {
     subCategory: "",
     gulp: "",
     price: "",
+    brand: "",
     description: "",
     expiryDate: "",
     timestamps: "",

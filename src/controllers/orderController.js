@@ -10,57 +10,77 @@ const createOrder =  async (req, res) => {
          const user = await User.findById(userId); 
          if(user)
          {
-          const orderCart = await Cart.findOne({
-            cartId: req.body.cartId
-          });
-          const updateStock = async (products) => {
-            let quantity = 0;
-            let productExist2;
-            for (let index = 0; index < products.length; index++) { // or add index <= length
-              const product = products[index];
-              quantity += product.quantity;
-            productExist2 = await Product.findById(product.productID) 
-             console.log(productExist2)
-                if(productExist2.amountInStock < quantity) {
-                    return res.status(401).send({
-                        status: false,
-                        message: `This ${productExist2.productName} is temporarily out of stock`
-                    })
-                } else {
-                     productExist2.amountInStock -= quantity; // pEs = pEs - quantity
-             await productExist2.save();
+            const orderCart = await Cart.findOne({
+                _id: req.body.cartId
+            });
+            if (!orderCart) {
+                return res.status(404).send({
+                    status: false,
+                    message: "order not found"
+                })
+            };
+
+            const updateStock = async (products) => {
+               // let quantity = 1;
+                let productExist2;
+                for (let index = 0; index < products.length; index++) { // or add index <= length
+                const product = products[index];
+              // quantity += product.quantity;
+                productExist2 = await Product.findById(product.productID) 
+                console.log(productExist2)
+                    if(productExist2.amountInStock < product.quantity) {
+                        return res.status(401).send({
+                            status: false,
+                            message: `This ${productExist2.productName} is temporarily out of stock`
+                        })
+                    } else {
+                        productExist2.amountInStock -= product.quantity || 1; // pEs = pEs - 1
+                await productExist2.save();
+                }
+                //return productExist2;
             }
             return productExist2;
-         }
-        };
-           updateStock(orderCart.products);
-          const newOrder = new Order({
-            userId: userId , 
-            cart:  [orderCart],
-            address: req.body.address
-          });
-          const reqBody = req.body.cartId
-          const deletedCart = await Cart.findOneAndDelete(reqBody);
-          if(!deletedCart)
-          {
-            return res.status(400).json({
-              message: "Cart cannot be deleted!"
-            })
-          }
-          const savedOrder = await newOrder.save();
-             return res.status(200).json({
-                message: "Order created Successfully!",
-                return : savedOrder});
-         } else{
-         return res.status(404).json({
+            };
+            updateStock(orderCart.products);
+            console.log(orderCart.products)
+
+           
+
+            // Order is saved to the DB below
+            const newOrder = new Order({
+                userId: userId , 
+                cart: [orderCart],
+                address: req.body.address
+            });
+            const reqBody = req.body.cartId
+            const deletedCart = await Cart.findOneAndDelete(reqBody);
+            if(!deletedCart)
+            {
+                return res.status(400).json({
+                message: "Cart cannot be deleted!"
+                })
+            }
+            const savedOrder = await newOrder.save();
+            if (orderCart.itemCount >= 10){
+                return res.status(200).json({
+                    message: "Order created Successfully!",
+                    complimentary: "Disposable Cups Included",
+                    return : savedOrder});
+            } else {
+                return res.status(200).json({
+                    message: "Order created Successfully!",
+                    return : savedOrder});
+            }
+         } else {
+            return res.status(404).json({
             message: "Invalid User!",
          })
        }
-      }
-           catch (err) {
-            console.log(err) 
-            return res.status(500).json(err);
-            }                                                                                                       
+    }
+     catch (err) {
+     console.log(err) 
+     return res.status(500).json(err);
+    }                                                                                                       
 };
 
 
@@ -73,13 +93,12 @@ const createOrder =  async (req, res) => {
     if(order)
          {
           order.address = req.body.address;
-          await order.save();
+          const orderRet = await order.save();
           return res.status(200).send({
                status: true,
                message: "Order has been updated successfully",
-               updatedOrder: updateOrder,
+               updatedOrder: orderRet,
              })
-            
             }else
           {
            return res.status(404).json({
@@ -109,35 +128,16 @@ const createOrder =  async (req, res) => {
         }
       const order = await Order.findById(orderId) // Order.findOne({ userId: orderId }); 
         if (!order) {
-          console.log(order)
+         // console.log(order)
             return res.status(400).json({
                 status: 'fail',
                 message: `Order with Id: ${orderId} does not exist!`
             })
         }else {
-          console.log(order);
+         // console.log(order);
 
-        //   const stockUpdate = order.cart
-
-        //   let y = stockUpdate.id; 
-
-          const updateStock = async (products) => {
-            let quantity = 0;
-            let productExist2;
-            for (let index = 0; index < products.length; index++) { // or add index <= length
-              const product = products[index];
-              quantity += product.quantity;
-            productExist2 = await Product.findById(product.productID) 
-             console.log(productExist2)
-            productExist2.amountInStock += quantity; // pEs = pEs + quantity
-             await productExist2.save();
-             console.log(productExist2)
-            }
-            return productExist2;
-            };
-           updateStock(order.cart);
-
-           console.log(order.cart)
+        //    updateStock(cartArray.products);
+        //     console.log(cartArray.products)
         //    for (let i = 0; i < order.cart.length; i++) {
         //     for (let j = 0; j < arr[i].length; j++) {
 
@@ -154,7 +154,9 @@ const createOrder =  async (req, res) => {
 
 
 
-       await Order.findOneAndDelete({userId: orderId})
+     //  await Order.findOneAndDelete({userId: orderId})
+
+      await Order.findByIdAndDelete(orderId)
        return  res.status(200).json({
             message: 'Order deleted successfully'
         })};
@@ -178,7 +180,7 @@ const getUserOrder = async (req, res) => {
             message: "Invalid User! "
           })
         }
-        const order = await Order.findOne({userId})
+        const order = await Order.findOne({ userId })
         return res.status(200).json({
             data: order
         })
