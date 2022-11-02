@@ -23,7 +23,7 @@ const addToCart = async (req, res) => {
   try {
     const userID = req.params.id;
     const user = req.user; // identify the user
-    if (!user && user.id !== userID) {
+    if (user.id !== userID) {   // !user && 
       return res
         .status(401)
         .json({ success: false, message: "unauthorized user" });
@@ -179,7 +179,7 @@ const removeFromCart = async (req, res) => {
   try {
     const userID = req.params.id;
     const user = req.user; // identify the user
-    if (!user && user.id !== userID) {
+    if (user.id !== userID) {   //!user &&
       return res
         .status(401)
         .json({ success: false, message: "unauthorized user" });
@@ -205,9 +205,6 @@ const removeFromCart = async (req, res) => {
       // REMOVE TO CART SECTION
       // CHECK IF PRODUCT ALREADY IN CART
       if (product != undefined) {
-
-    
-
         let quantity = parseInt(req.body.quantity); // convert product quantity to a number or we can remove this line.
         if (cart.products.length === 1 && product.quantity === 1) {
           await Cart.findOneAndDelete({ _id: user._id });

@@ -2,12 +2,25 @@ const Order = require("../models/orderModel");
 const User = require("../models/userModel");
 const Cart = require("../models/cartModel");
 const Product = require("../models/productModel");
+const Flutterwave = require("flutterwave-node-v3");
+const nodemailer = require("nodemailer");
+fs = require('fs');
+
 
 // CREATE AN ORDER
 const createOrder =  async (req, res) => {
   try {
-         const userId = req.params.userId;
-         const user = await User.findById(userId); 
+    const userId = req.params.userId;
+    const user = req.user; // identify the user
+    if (user.id !== userId) {   // !user && 
+      return res
+        .status(401)
+        .json({ success: false, message: "unauthorized user" });
+    }
+
+
+         
+        // const user = await User.findById(userId); 
          if(user)
          {
             const orderCart = await Cart.findOne({
@@ -20,6 +33,7 @@ const createOrder =  async (req, res) => {
                 })
             };
 
+            // This updates the stock of the products in store after an order has been created. 
             const updateStock = async (products) => {
                // let quantity = 1;
                 let productExist2;
@@ -27,7 +41,6 @@ const createOrder =  async (req, res) => {
                 const product = products[index];
               // quantity += product.quantity;
                 productExist2 = await Product.findById(product.productID) 
-                console.log(productExist2)
                     if(productExist2.amountInStock < product.quantity) {
                         return res.status(401).send({
                             status: false,
@@ -42,35 +55,50 @@ const createOrder =  async (req, res) => {
             return productExist2;
             };
             updateStock(orderCart.products);
-            console.log(orderCart.products)
 
-           
+        
 
             // Order is saved to the DB below
-            const newOrder = new Order({
+
+            if (orderCart.itemCount >= 10){
+              const newOrder = new Order({
                 userId: userId , 
                 cart: [orderCart],
-                address: req.body.address
+                address: req.body.address,
+                complimentary: "Disposable Cups Included",
+                orderAmount: orderCart.totalPrice
             });
-            const reqBody = req.body.cartId
-            const deletedCart = await Cart.findOneAndDelete(reqBody);
-            if(!deletedCart)
-            {
-                return res.status(400).json({
-                message: "Cart cannot be deleted!"
-                })
-            }
             const savedOrder = await newOrder.save();
-            if (orderCart.itemCount >= 10){
-                return res.status(200).json({
-                    message: "Order created Successfully!",
-                    complimentary: "Disposable Cups Included",
-                    return : savedOrder});
-            } else {
-                return res.status(200).json({
-                    message: "Order created Successfully!",
-                    return : savedOrder});
-            }
+            return res.status(200).json({
+              message: "Order created Successfully!",
+              return : savedOrder});
+              } else {
+                  const newOrder = new Order({
+                    userId: userId , 
+                    cart: [orderCart],
+                    address: req.body.address,
+                    orderAmount: orderCart.totalPrice
+                  });
+                  const savedOrder = await newOrder.save();
+                  return res.status(200).json({
+                  message: "Order created Successfully!",
+                  return : savedOrder});
+              }
+
+          
+
+
+
+
+            // const reqBody = req.body.cartId
+            // const deletedCart = await Cart.findOneAndDelete(reqBody);
+            // if(!deletedCart)
+            // {
+            //     return res.status(400).json({
+            //     message: "Cart cannot be deleted!"
+            //     })
+            // }
+            
          } else {
             return res.status(404).json({
             message: "Invalid User!",
@@ -134,27 +162,6 @@ const createOrder =  async (req, res) => {
                 message: `Order with Id: ${orderId} does not exist!`
             })
         }else {
-         // console.log(order);
-
-        //    updateStock(cartArray.products);
-        //     console.log(cartArray.products)
-        //    for (let i = 0; i < order.cart.length; i++) {
-        //     for (let j = 0; j < arr[i].length; j++) {
-
-
-
-        //       product *= arr[i][j];
-        //     }
-        //   }
-          // Only change code above this line
-        //   return product;
-        // }
-
-
-
-
-
-     //  await Order.findOneAndDelete({userId: orderId})
 
       await Order.findByIdAndDelete(orderId)
        return  res.status(200).json({

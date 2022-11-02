@@ -18,6 +18,13 @@ const OrderSchema = new mongoose.Schema(
 
     status: { type: String, 
               default: "pending" },
+    complimentary: {
+        type: String,
+        default: "No Complimentary Service",
+    },
+    orderAmount: { 
+        type: Number,
+    }
   },
   { timestamps: true }
 );

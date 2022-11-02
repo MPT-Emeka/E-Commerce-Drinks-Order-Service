@@ -4,6 +4,7 @@ const Token = require("../models/token-model");
 const { createToken } = require("../middlewares/authMiddleware");
 const handleError = require("../helpers/errors");
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 const cookie = require("cookie-parser");
 // add mongoose*
 
@@ -120,33 +121,62 @@ const requestPasswordReset = async (email) => {
       createdAt: Date.now(),
     }).save();
 
-    return tokenReset;
+    const resetUrl = `${req.protocol}://${req.get("host")}/api/v1/auths/reset-password/${resetToken}`;
+    const message = `To reset your password click on the link below to submit your new password: ${resetUrl}`;
+
+    let mail = nodemailer.createTransport({
+        service : 'protonmail',
+        auth : {
+            user : process.env.HOST_EMAIL,
+            pass : process.env.EMAIL_PASS
+        }
+    });
+
+    let mailOptions = {
+        from : process.env.HOST_EMAIL,
+        to : user.email,
+        message,
+        subject : "Your password reset token. It's valid for 10mins",
+        text : resetUrl
+    }
+    
+    mail.sendMail(mailOptions, function(error, info) {
+        if (error) {
+            console.log(error);
+        } else {
+            console.log('Email sent : ' + info.response);
+        }
+    })
+
+
+    return ({
+        status: "success",
+        message: "Password reset url sent to your mail",
+        resetUrl
+    });
+
+
   } catch (error) {
-    res.status(400).json({ message: error }); //return
+    return res.status(400).json({ message: error }); //return
   }
 };
 
 const resetPassword = async (userId, token, password) => {
   try {
     const passwordResetToken = await Token.findOne({ userId });
-    console.log(passwordResetToken)
     if (!passwordResetToken) {
       return res
         .status(400)
-        .json({ message: "Invalid token" });
+        .json({ message: "Invalid token or expired reset token" });
     }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
-    console.log(hash)
     await User.updateOne(
       { _id: userId },
-      { $set: { password: hash } },
+      { $set: { password: hash, confirmPassword: hash } },
       { new: true }
   ); 
   return ({ "message": "You have successfully updated your Password." });
-    // return res
-    //   .status(201)
-    //   .send({ "message": "You have successfully updated your Password." }); //added vb
   } catch (error) {
     console.log(error)
     res.status(400).json({ message: error });
@@ -158,7 +188,7 @@ exports.resetPasswordRequestController = async (req, res, next) => {
     const requestPasswordResetService = await requestPasswordReset(
       req.body.email
     );
-    return res.status(200).json(requestPasswordResetService);
+    return res.status(200).json({ requestPasswordResetService });
   } catch (error) {
     res.status(400).json({ message: error });
   }
@@ -169,13 +199,19 @@ exports.resetPasswordController = async (req, res, next) => {
     const resetPasswordService = await resetPassword(
       req.body.userId,
       req.body.token,
-      req.body.password
+      req.body.password,
+      req.body.confirmPassword
     );
+    if (password !== confirmPassword) {
+        res.status(400).json({ message: "Passwords do not match" });
+    }
     return res.status(200).json(resetPasswordService); 
   } catch (error) {
     res.status(400).json({ message: error });
   }
 };
+
+
 exports.deleteUser = async(req, res)=>{
   try{
     const deletedUser =  await User.findOneAndDelete({_id: req.user.id }); // check during postman test

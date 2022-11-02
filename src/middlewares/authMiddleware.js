@@ -50,5 +50,5 @@ exports.checkUser = (...roles) => {
         });
     }
     next();
-  }
+  };
 };

@@ -10,10 +10,10 @@ const { createProduct, updateProduct, getProduct, getProductListing, deleteProdu
 productRouter
   .route("/product")
   .post(auth, createProduct)
-  .get(auth, getProductListing)
+  .get( getProductListing ) 
   .delete(auth, deleteProduct);
 
 productRouter.put("/product/:id", auth, updateProduct);
-productRouter.get("/product/:id", auth, getProduct);
+productRouter.get("/product/:id", getProduct );
 
 module.exports = productRouter;
