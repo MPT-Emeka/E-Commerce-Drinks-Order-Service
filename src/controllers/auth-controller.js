@@ -125,7 +125,7 @@ const requestPasswordReset = async (email) => {
     const message = `To reset your password click on the link below to submit your new password: ${resetUrl}`;
 
     let mail = nodemailer.createTransport({
-        service : 'protonmail',
+        service : 'gmail',
         auth : {
             user : process.env.HOST_EMAIL,
             pass : process.env.EMAIL_PASS
