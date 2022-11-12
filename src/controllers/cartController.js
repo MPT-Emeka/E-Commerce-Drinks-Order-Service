@@ -274,7 +274,7 @@ const getCart = async (req, res) => {
   try {
     const userID = req.params.id;
     const user = req.user;
-    if (!user && user.id !== userID) {
+    if (user.id !== userID) {    // !user &&
       return res
         .status(401)
         .json({ success: false, message: "unauthorized user" });
@@ -317,7 +317,7 @@ const deleteCart = async (req, res) => {
     // check if cart exists
     const userID = req.params.id;
     const user = req.user;
-    if (!user && user.id !== userID) {
+    if (user.id !== userID) {  // !user && 
       return res
         .status(401)
         .json({ success: false, message: "unauthorized user" });

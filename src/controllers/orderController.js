@@ -29,7 +29,7 @@ const createOrder =  async (req, res) => {
             if (!orderCart) {
                 return res.status(404).send({
                     status: false,
-                    message: "order not found"
+                    message: "cart not found"
                 })
             };
 
@@ -115,9 +115,17 @@ const createOrder =  async (req, res) => {
  //UPDATE ORDER
  const updateOrder = async (req, res) => {
   try {
+
     const id = req.params.userId;
+
+    const user = req.user; // identify the user
+    if (user.id !== id) {   // !user && 
+      return res
+        .status(401)
+        .json({ success: false, message: "unauthorized user" });
+    }
+
     const order = await Order.findOne({id});
-    console.log(order)
     if(order)
          {
           order.address = req.body.address;
@@ -134,7 +142,6 @@ const createOrder =  async (req, res) => {
           })
              }
         }catch (err) {
-          console.log(err)
           return res.status(500).json(err);
       }}
     
@@ -143,9 +150,20 @@ const createOrder =  async (req, res) => {
  //DELETE AN ORDER
  const deleteOrder = async (req, res) => {
     try {
-        //const order = await Order.findOne({id});
+      
+
+    const userId = req.params.userId;
+    const useR = req.user; // identify the user
+    if (useR.id !== userId) {   // !user && 
+      return res
+        .status(401)
+        .json({ success: false, message: "unauthorized user" });
+    }
+      
+
+
+      //const order = await Order.findOne({id});
      // const { userId} = req.params;
-      const userId = req.params.userId;
       const orderId = req.body.orderId;
       const user = await User.findById(userId);
       if(!user)
@@ -179,7 +197,22 @@ const createOrder =  async (req, res) => {
 // GET ONE USER ORDER
 const getUserOrder = async (req, res) => {
     try {
+
+
       const { userId } = req.params;
+    const useR = req.user; // identify the user
+    if (useR.id !== userId) {   // !user && 
+      return res
+        .status(401)
+        .json({ success: false, message: "unauthorized user" });
+    }
+
+
+
+
+
+
+//      const { userId } = req.params;
       const user = await User.findById(userId);
       if(!user)
         {
@@ -202,6 +235,15 @@ const getUserOrder = async (req, res) => {
  //GET ALL ORDERS
 const getAllOrders = async (req, res) => {
     try {
+
+      const user = req.user; 
+      if (user.role.includes("user")) {
+        return response.status(400).json({
+            status: false,
+            message: "only gulp admins can fetch all Orders"
+        })
+    }
+
         const order = await Order.find({});
         res.status(200).json({
             message: "All Orders have been retrieved!",
