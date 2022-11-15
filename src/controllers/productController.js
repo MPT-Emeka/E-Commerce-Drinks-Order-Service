@@ -2,6 +2,7 @@ const Product = require("../models/productModel");
 const User = require('../models/userModel')
 const productErrorHandler = require("../helpers/productErrorHandler");
 const { response } = require("../../app");
+//const QueryMethod = require("../helpers/query")
 
 
 
@@ -103,6 +104,22 @@ exports.getProduct = async (request, response) => {
 
 exports.getProductListing = async (request, response) => {
     try {
+
+      // let queriedDrinks = new QueryMethod(Product.find(), request.query)
+      //     .sort()
+      //     .filter()
+      //     .limit()
+      //     .paginate();
+      // let drinks = await queriedDrinks.query;
+      // response.status(200).json({
+      //   status: true,
+      //   message: "All drinks",
+      //   productListing: drinks,
+      //   counts: drinks.length,
+
+      // })
+
+
 
       const findAllProduct = await Product.find();
       return response.status(200).send({

@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/userModel");
 const ErrorHandler = require("../helpers/userErrorHandler");
+//const QueryMethod = require("../helpers/query")
 
 exports.updateUser = async (request, response) => {
   try {
@@ -54,6 +55,22 @@ exports.getUser = async (request, response) => {
 
 exports.getAllUsers = async (request, response) => {
   try {
+
+    // let queriedUsers = new QueryMethod(User.find(), request.query)
+    //   .sort()
+    //   .filter()
+    //   .limit()
+    //   .paginate();
+    // let users = await queriedUsers.query;
+    // response.status(200).json({
+    //   status: true,
+    //   message: "Users found",
+    //   count: users.length,
+    //   allUsers: users,
+    // })
+
+
+
     const findAllUsers = await User.find();
     return response.status(200).send({
       status: true,
