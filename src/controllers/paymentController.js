@@ -80,7 +80,7 @@ exports.checkoutOrder = async (req, res) => {
                     }
                 });
                 
-                let orderItems = await Order.find({userId});
+                let orderItems = await Order.find({userId});   // check ln 83 - 90 for deletion 
                 if (orderItems) {
                     orderItems.map(async orderItem => {
                         await Order.findByIdAndUpdate(orderItem._id, {
@@ -114,10 +114,10 @@ exports.checkoutOrder = async (req, res) => {
                 })
                 } 
                 if(callValidate.status === 'error') {
-                    res.status(400).send("please try again");
+                    return res.status(400).send("please try again");
                 }
                 else {
-                    res.status(400).send("payment failed");
+                    return res.status(400).send("payment failed");
                 }
             }
 

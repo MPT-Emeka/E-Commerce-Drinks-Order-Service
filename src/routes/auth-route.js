@@ -23,6 +23,6 @@ router.delete("/delete", auth, deleteUser);
 router
   .route("/resetpassword")
   .put(resetPasswordRequestController)
-  router.post("/resetpassword/:token", resetPasswordController);
+  router.post("/reset-password/:token", resetPasswordController);
 
 module.exports = router;

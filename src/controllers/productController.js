@@ -2,7 +2,7 @@ const Product = require("../models/productModel");
 const User = require('../models/userModel')
 const productErrorHandler = require("../helpers/productErrorHandler");
 const { response } = require("../../app");
-//const QueryMethod = require("../helpers/query")
+const QueryMethod = require("../helpers/query")
 
 
 
@@ -46,19 +46,31 @@ exports.createProduct = async (request, response) => {
 
 exports.updateProduct = async (request, response) => {
   try {
-    const user = await User.findById(request.headers.id);
+
+    const user = req.user
     if (user.role.includes("user")) {
         return response.status(400).send({
             status: false,
-            message: "only gulp admins can update drinks"
+            message: "only gulp admins can update products"
         })
     }
 
+
+
+    // const user = await User.findById(request.headers.id);
+    // if (user.role.includes("user")) {
+    //     return response.status(400).send({
+    //         status: false,
+    //         message: "only gulp admins can update drinks"
+    //     })
+    // }
+
     const findProduct = await Product.findById(request.params.id);
-    console.log(findProduct)
+  //  console.log(findProduct)
     if (findProduct) {
       findProduct.price = request.body.price;
       findProduct.description = request.body.description;
+      findProduct.amountInStock = request.body.amountInStock;
       await findProduct.save();
       return response.status(200).send({
         status: true,
@@ -105,30 +117,30 @@ exports.getProduct = async (request, response) => {
 exports.getProductListing = async (request, response) => {
     try {
 
-      // let queriedDrinks = new QueryMethod(Product.find(), request.query)
-      //     .sort()
-      //     .filter()
-      //     .limit()
-      //     .paginate();
-      // let drinks = await queriedDrinks.query;
-      // response.status(200).json({
-      //   status: true,
-      //   message: "All drinks",
-      //   productListing: drinks,
-      //   counts: drinks.length,
-
-      // })
-
-
-
-      const findAllProduct = await Product.find();
-      return response.status(200).send({
+      let queriedDrinks = new QueryMethod(Product.find(), request.query)
+          .sort()
+          .filter()
+          .limit()
+          .paginate();
+      let drinks = await queriedDrinks.query;
+      response.status(200).json({
         status: true,
-        message: "Product Listing",
-        productListing: findAllProduct,
-        counts: findAllProduct.length,
-        productCounter: findAllProduct.amountInStock // check 
-      });
+        message: "All drinks",
+        productListing: drinks,
+        counts: drinks.length,
+
+      })
+
+
+
+      // const findAllProduct = await Product.find();
+      // return response.status(200).send({
+      //   status: true,
+      //   message: "Product Listing",
+      //   productListing: findAllProduct,
+      //   counts: findAllProduct.length,
+      //   productCounter: findAllProduct.amountInStock // check 
+      // });
     } catch (error) {
       const err = productErrorHandler(error);
       return response.status(400).json({ err });
@@ -138,13 +150,24 @@ exports.getProductListing = async (request, response) => {
 
 exports.deleteProduct = async (request, response) => {
   try {
-    const user = await User.findById(request.headers.id);
+
+    const user = request.user
     if (user.role.includes("user")) {
         return response.status(400).send({
             status: false,
             message: "only gulp admins can delete drinks"
         })
     }
+
+
+
+    // const user = await User.findById(request.headers.id);
+    // if (user.role.includes("user")) {
+    //     return response.status(400).send({
+    //         status: false,
+    //         message: "only gulp admins can delete drinks"
+    //     })
+    // }
     const { id } = request.query;
     const findProduct = await Product.findById(id)
     if(findProduct) {
